@@ -1,0 +1,179 @@
+1170. Compare Strings by Frequency of the Smallest Character
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+class Solution {
+    public int[] numSmallerByFrequency(String[] queries, String[] words) {
+        int[] res = new int[queries.length];
+        int j =0;
+        for(String query : queries){
+            int val = 0;
+            for(String word : words){
+                if(frequency(query) < frequency(word)){
+                    val++;
+                }
+            }
+            res[j] = val;
+            j++;
+        }
+        return Arrays.stream(res).toArray();
+    }
+    public int frequency(String word){
+        List<Character> list = new ArrayList<>();
+        int count = 0;
+        char[] arr = word.toCharArray();
+        Arrays.sort(arr);
+        for(int i = 0; i<arr.length;i++){
+            if(arr[0] == arr[i]){
+                count++;
+            }
+            else{
+                break;
+            }
+        }
+        return count;
+    }
+}
+1202. Smallest String With Swaps
+class UF {
+  public UF(int n) {
+    id = new int[n];
+    for (int i = 0; i < n; ++i)
+      id[i] = i;
+  }
+
+  public void union(int u, int v) {
+    id[find(u)] = find(v);
+  }
+
+  public int find(int u) {
+    return id[u] == u ? u : (id[u] = find(id[u]));
+  }
+
+  private int[] id;
+}
+
+class Solution {
+  public String smallestStringWithSwaps(String s, List<List<Integer>> pairs) {
+    StringBuilder ans = new StringBuilder();
+    UF uf = new UF(s.length());
+    Map<Integer, Queue<Character>> map = new HashMap<>();
+
+    for (List<Integer> pair : pairs)
+      uf.union(pair.get(0), pair.get(1));
+
+    for (int i = 0; i < s.length(); ++i)
+      map.computeIfAbsent(uf.find(i), k -> new PriorityQueue<>()).offer(s.charAt(i));
+
+    for (int i = 0; i < s.length(); ++i)
+      ans.append(map.get(uf.find(i)).poll());
+
+    return ans.toString();
+  }
+}
+1268. Search Suggestions System
+class TrieNode {
+    public TrieNode[] children;
+    public PriorityQueue<String> pq;
+    
+    public TrieNode() {
+        children = new TrieNode[26];
+        pq = new PriorityQueue<>((a,b) -> b.compareTo(a));
+    }
+    
+    public void addToPQ(String word) {
+        pq.add(word);
+        if (pq.size() > 3) pq.poll();
+    }
+    
+    public List<String> getTopThree() {
+        List<String> topThree = new ArrayList<>();
+        while (!pq.isEmpty()) topThree.add(pq.poll());
+        Collections.reverse(topThree);
+        return topThree;
+    }
+}
+
+1288. Remove Covered Intervals
+class Solution {
+    public int removeCoveredIntervals(int[][] intervals) {
+        Arrays.sort(intervals,(a,b)->a[0]==b[0]?b[1]-a[1]:a[0]-b[0]);
+
+        int idx=0;
+        int cnt=1;
+        for(int i=1;i<intervals.length;i++){
+            if(intervals[i][1]>intervals[idx][1]){
+                cnt++;
+                idx=i;
+            }
+        }
+        return cnt;
+    }
+}
+1296. Divide Array in Sets of K Consecutive Numbers
+record SubSeq(int start, int end) {};
+
+class Solution {
+    public boolean isPossibleDivide(int[] nums, int k) {
+        // sort into increasing order
+        Arrays.sort(nums);
+
+        PriorityQueue<SubSeq> subsequences = new PriorityQueue<>((SubSeq subseq1, SubSeq subseq2) -> {
+            return (subseq1.end() == subseq2.end()) 
+                ?
+                (subseq1.end() - subseq1.start()) - (subseq2.end() - subseq2.start()) 
+                :
+                (subseq1.end() - subseq2.end());
+        });
+
+        for (int num : nums) {
+            // while subsequences have k length elements, we are good to remove them
+            while(!subsequences.isEmpty() && getSequenceLength(subsequences.peek()) == k) {
+                subsequences.poll();
+            }
+
+            // while current number (num) doesn't create a subsequence with any sequence of queue
+            // Ex: we have sequence start=6, end = 8. But current num = 10. So, 10 cannot fall into the sequence
+            // [6,7,8] form a sequence. But adding 10 to it [6,7,8,10] does not cover our condition
+            // therefore, we should remove the [6,7,8] from the sequences.
+            // Sorting helps us ensure we can always get a larger number
+            while (!subsequences.isEmpty() && subsequences.peek().end() + 1 < num ) {
+                // and check if that sequence [6,7,8] met our condition of size = k
+                if(!isValid(subsequences, k)) {
+                    return false;
+                }
+            }
+            // create a new subsequence when the stack is empty or for duplicate nums
+            if (subsequences.isEmpty() || subsequences.peek().end() == num) {
+                // create a new subsequence. Ex: {6, 6}
+                subsequences.add(new SubSeq(num, num));
+            } else {
+                // add num to an existing subsequence
+                SubSeq curSubsequence = subsequences.poll();
+                SubSeq newSub = new SubSeq(curSubsequence.start(), num);
+                subsequences.add(newSub);
+            }
+        }
+
+        // If any subsequence is of length != k, return false
+        while (!subsequences.isEmpty()) {
+            if(!isValid(subsequences, k)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    int getSequenceLength(SubSeq seq) {
+        // seq: [6,7,8] => start: 6, end: 8 => length: 8-6+1 = 3
+        return seq.end() - seq.start() + 1;
+    }
+
+    boolean isValid(Queue<SubSeq> subsequences, int k) {
+        SubSeq curSubsequence = subsequences.poll();
+        int subsequenceLength = getSequenceLength(curSubsequence);
+        return subsequenceLength == k;
+    }
+}
