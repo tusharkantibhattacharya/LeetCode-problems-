@@ -1,0 +1,209 @@
+10. Regular Expression Matching
+enum Result {
+    TRUE, FALSE
+}
+
+class Solution {
+    Result[][] memo;
+
+    public boolean isMatch(String text, String pattern) {
+        memo = new Result[text.length() + 1][pattern.length() + 1];
+        return dp(0, 0, text, pattern);
+    }
+
+    public boolean dp(int i, int j, String text, String pattern) {
+        if (memo[i][j] != null) {
+            return memo[i][j] == Result.TRUE;
+        }
+        boolean ans;
+        if (j == pattern.length()){
+            ans = i == text.length();
+        } else{
+            boolean first_match = (i < text.length() &&
+                                   (pattern.charAt(j) == text.charAt(i) ||
+                                    pattern.charAt(j) == '.'));
+
+            if (j + 1 < pattern.length() && pattern.charAt(j+1) == '*'){
+                ans = (dp(i, j+2, text, pattern) ||
+                       first_match && dp(i+1, j, text, pattern));
+            } else {
+                ans = first_match && dp(i+1, j+1, text, pattern);
+            }
+        }
+        memo[i][j] = ans ? Result.TRUE : Result.FALSE;
+        return ans;
+    }
+}
+32. Longest Valid Parentheses
+class Solution {
+    public int longestValidParentheses(String s) {
+        Stack<Integer> stack = new Stack<>();
+        stack.push(-1);
+        int max_len = 0;
+
+        for (int i = 0; i < s.length(); i++) {
+            if (s.charAt(i) == '(') {
+                stack.push(i);
+            } else {
+                stack.pop();
+                if (stack.isEmpty()) {
+                    stack.push(i);
+                } else {
+                    max_len = Math.max(max_len, i - stack.peek());
+                }
+            }
+        }
+
+        return max_len;        
+    }
+}
+42. Trapping Rain Water
+class Solution {
+    public int trap(int[] height) {
+        int left = 0;
+        int right = height.length - 1;
+        int leftMax = height[left];
+        int rightMax = height[right];
+        int water = 0;
+
+        while (left < right) {
+            if (leftMax < rightMax) {
+                left++;
+                leftMax = Math.max(leftMax, height[left]);
+                water += leftMax - height[left];
+            } else {
+                right--;
+                rightMax = Math.max(rightMax, height[right]);
+                water += rightMax - height[right];
+            }
+        }
+
+        return water;        
+    }
+}
+44. Wildcard Matching
+// Approach -1
+
+public class Solution {
+    public boolean isMatch(String s, String p) {
+        int n = p.length(); // Length of the pattern
+        int m = s.length(); // Length of the text
+
+        // Create a 2D array to store the result of subproblems
+        int[][] dp = new int[n + 1][m + 1];
+        for (int[] row : dp) {
+            Arrays.fill(row, -1);
+        }
+
+        // Call the recursive helper function to perform wildcard matching
+        return isMatchUtil(p, s, n - 1, m - 1, dp) == 1;
+    }
+
+    // Helper method to check if the pattern matches the text
+    static int isMatchUtil(String pattern, String text, int i, int j, int[][] dp) {
+        // Base Cases
+        if (i < 0 && j < 0) {
+            return 1; // Both strings are empty, and the pattern matches.
+        }
+        if (i < 0 && j >= 0) {
+            return 0; // Pattern is empty, but there are characters left in text.
+        }
+        if (j < 0 && i >= 0) {
+            // Text is empty, check if remaining characters in pattern are all '*'.
+            return isAllStars(pattern, i) ? 1 : 0;
+        }
+
+        // If the result is already computed, return it.
+        if (dp[i][j] != -1) {
+            return dp[i][j];
+        }
+
+        // If the characters match or pattern has a '?', continue matching the rest of the strings.
+        if (pattern.charAt(i) == text.charAt(j) || pattern.charAt(i) == '?') {
+            return dp[i][j] = isMatchUtil(pattern, text, i - 1, j - 1, dp);
+        } else {
+            if (pattern.charAt(i) == '*') {
+                // Two possibilities when encountering '*':
+                // 1. '*' matches one or more characters in text.
+                // 2. '*' matches zero characters in text.
+                return dp[i][j] = (isMatchUtil(pattern, text, i - 1, j, dp) == 1 || isMatchUtil(pattern, text, i, j - 1, dp) == 1) ? 1 : 0;
+            } else {
+                // Characters don't match, and pattern[i] is not '*'.
+                return 0;
+            }
+        }
+    }
+
+    // Helper method to check if the remaining characters in the pattern are all '*'
+    static boolean isAllStars(String pattern, int i) {
+        for (int j = 0; j <= i; j++) {
+            if (pattern.charAt(j) != '*') {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+85. Maximal Rectangle
+class Solution {
+    public int maximalRectangle(char[][] matrix) {
+        if (matrix == null || matrix.length == 0 || matrix[0].length == 0){
+            return 0;
+        }
+        int m = matrix.length;
+        int n = matrix[0].length;
+
+        int[] heights = new int[n];
+        int[] leftBoundaries = new int[n];
+        int[] rightBoundaries = new int[n];
+        Arrays.fill(rightBoundaries, n);
+
+        int maxRectangle = 0;
+
+        for (int i = 0; i < m; i++) {
+            int left = 0;
+            int right = n;
+
+            updateHeightsAndLeftBoundaries(matrix[i], heights, leftBoundaries, left);
+
+            updateRightBoundaries(matrix[i], rightBoundaries, right);
+
+            maxRectangle = calculateMaxRectangle(heights, leftBoundaries, rightBoundaries, maxRectangle);
+        }
+
+        return maxRectangle;
+    }
+
+    private void updateHeightsAndLeftBoundaries(char[] row, int[] heights, int[] leftBoundaries, int left) {
+        for (int j = 0; j < heights.length; j++) {
+            if (row[j] == '1') {
+                heights[j]++;
+                leftBoundaries[j] = Math.max(leftBoundaries[j], left);
+            } else {
+                heights[j] = 0;
+                leftBoundaries[j] = 0;
+                left = j + 1;
+            }
+        }
+    }
+
+    private void updateRightBoundaries(char[] row, int[] rightBoundaries, int right) {
+        for (int j = rightBoundaries.length - 1; j >= 0; j--) {
+            if (row[j] == '1') {
+                rightBoundaries[j] = Math.min(rightBoundaries[j], right);
+            } else {
+                rightBoundaries[j] = right;
+                right = j;
+            }
+        }
+    }
+
+    private int calculateMaxRectangle(int[] heights, int[] leftBoundaries, int[] rightBoundaries, int maxRectangle) {
+        for (int j = 0; j < heights.length; j++) {
+            int width = rightBoundaries[j] - leftBoundaries[j];
+            int area = heights[j] * width;
+            maxRectangle = Math.max(maxRectangle, area);
+        }
+        return maxRectangle;
+    }
+}

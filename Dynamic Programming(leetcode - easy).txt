@@ -1,0 +1,109 @@
+70. Climbing Stairs
+class Solution {
+    public int climbStairs(int n) {
+        if (n == 0 || n == 1) {
+            return 1;
+        }
+        return climbStairs(n-1) + climbStairs(n-2);
+    }
+}
+118. Pascal's Triangle
+import java.util.ArrayList;
+import java.util.List;
+
+class Solution {
+    public List<List<Integer>> generate(int numRows) {
+        List<List<Integer>> result = new ArrayList<>();
+        if (numRows == 0) {
+            return result;
+        }
+
+        List<Integer> firstRow = new ArrayList<>();
+        firstRow.add(1);
+        result.add(firstRow);
+
+        for (int i = 1; i < numRows; i++) {
+            List<Integer> prevRow = result.get(i - 1);
+            List<Integer> currentRow = new ArrayList<>();
+            currentRow.add(1);
+
+            for (int j = 1; j < i; j++) {
+                currentRow.add(prevRow.get(j - 1) + prevRow.get(j));
+            }
+
+            currentRow.add(1);
+            result.add(currentRow);
+        }
+
+        return result;
+    }
+}
+121. Best Time to Buy and Sell Stock
+class Solution {
+    public int maxProfit(int[] prices) {
+        int buyPrice = prices[0];
+        int profit = 0;
+
+        for (int i = 1; i < prices.length; i++) {
+            if (buyPrice > prices[i]) {
+                buyPrice = prices[i];
+            }
+
+            profit = Math.max(profit, prices[i] - buyPrice);
+        }
+
+        return profit;        
+    }
+}
+338. Counting Bits
+class Solution {
+    public int[] countBits(int n) {
+        // Create an array of size n + 1
+        int[] result = new int[n + 1];
+
+        // Base case: if n is 0, return the empty array
+        if (n == 0) {
+            return result;
+        }
+
+        // Base cases:
+        // Set the first two elements of the array
+        result[0] = 0;
+        if (n >= 1) {
+            result[1] = 1;
+        }
+
+        // Iterate from 2 to n
+        for (int x = 2; x <= n; ++x) {
+            // If 'x' is even, set the x-th element of the array to 
+            // the (x / 2)-th element
+            if (x % 2 == 0) {
+                result[x] = result[x / 2];
+            }
+            // If x is odd, set the x-th element of the array to 
+            // the (x / 2)-th element + 1
+            else {
+                result[x] = result[x / 2] + 1;
+            }
+        }
+
+        // Return the final array
+        return result;
+    }
+}
+392. Is Subsequence
+class Solution {
+    public boolean isSubsequence(String s, String t) {
+        int sp = 0;
+        int tp = 0;
+
+        while (sp < s.length() && tp < t.length()) {
+            if (s.charAt(sp) == t.charAt(tp)) {
+                sp++;
+            }
+            tp++;
+        }
+
+        return sp == s.length();        
+    }
+}
