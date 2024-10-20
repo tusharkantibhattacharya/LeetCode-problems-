@@ -1,0 +1,208 @@
+4. Median of Two Sorted Arrays
+import java.util.Arrays;
+
+class Solution {
+    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
+        // Get the sizes of both input arrays.
+        int n = nums1.length;
+        int m = nums2.length;
+
+        // Merge the arrays into a single sorted array.
+        int[] merged = new int[n + m];
+        int k = 0;
+        for (int i = 0; i < n; i++) {
+            merged[k++] = nums1[i];
+        }
+        for (int i = 0; i < m; i++) {
+            merged[k++] = nums2[i];
+        }
+
+        // Sort the merged array.
+        Arrays.sort(merged);
+
+        // Calculate the total number of elements in the merged array.
+        int total = merged.length;
+
+        if (total % 2 == 1) {
+            // If the total number of elements is odd, return the middle element as the median.
+            return (double) merged[total / 2];
+        } else {
+            // If the total number of elements is even, calculate the average of the two middle elements as the median.
+            int middle1 = merged[total / 2 - 1];
+            int middle2 = merged[total / 2];
+            return ((double) middle1 + (double) middle2) / 2.0;
+        }
+    }
+}
+37. Sudoku Solver
+class Solution {
+    boolean[][] visited = new boolean[10][60]; // 9 rows and values are till 58, so round figure 60
+    boolean[][] rows = new boolean[10][60];
+    boolean[][] cols = new boolean[10][60];
+    int dots = 0;
+    public void solveSudoku(char[][] board) {
+        for(int r = 0; r < 9; r++) {
+            for(int c = 0; c < 9; c++) {
+                if(board[r][c] != '.') {
+
+                    rows[r][board[r][c]] = true;
+                    cols[c][board[r][c]] = true;
+                    
+                    int box = (r / 3) * 3 + (c / 3) + 1;
+                    visited[box][board[r][c]] = true;
+                }
+                else dots++;
+            }
+        }
+        backtrack(board);
+    }
+    boolean backtrack(char[][] board) {
+        for(int r = 0; r < 9; r++) {
+            for(int c = 0; c < 9; c++) {
+                if(board[r][c] != '.') continue;
+                
+                for(char val = '1'; val <= '9'; val++) {
+                    if(valid(board, r, c, val)) {
+                        board[r][c] = val;
+                        rows[r][val] = true;
+                        cols[c][val] = true;
+                        int box = (r / 3) * 3 + (c / 3) + 1;
+                        visited[box][val] = true;
+                        dots--;
+                        if(dots == 0) return true;
+
+                        if(backtrack(board)) return true;
+
+                        visited[box][val] = false;
+                        rows[r][val] = false;
+                        cols[c][val] = false;
+                        board[r][c] = '.';
+                        dots++;
+                    }
+                }
+                return false;
+            }
+        }
+        return true; // we can also return false here, doesn't matter
+    }
+    boolean valid(char[][] board, int row, int col, char val) {
+        if(rows[row][val] == true) return false;
+        if(cols[col][val] == true) return false;
+        int box = (row / 3) * 3 + (col / 3) + 1;
+        if(visited[box][val] == true) return false;
+        return true;
+    }
+}
+41. First Missing Positive
+class Solution {
+    public int firstMissingPositive(int[] nums) {
+        int[] filteredNums = Arrays.stream(nums).filter(n -> n > 0).toArray();
+        
+        Arrays.sort(filteredNums);
+        
+        int target = 1;
+        for (int n : filteredNums) {
+            if (n == target) {
+                target++;
+            } else if (n > target) {
+                return target;
+            }
+        }
+        
+        return target;        
+    }
+}
+42. Trapping Rain Water
+class Solution {
+    public int trap(int[] height) {
+        int left = 0;
+        int right = height.length - 1;
+        int leftMax = height[left];
+        int rightMax = height[right];
+        int water = 0;
+
+        while (left < right) {
+            if (leftMax < rightMax) {
+                left++;
+                leftMax = Math.max(leftMax, height[left]);
+                water += leftMax - height[left];
+            } else {
+                right--;
+                rightMax = Math.max(rightMax, height[right]);
+                water += rightMax - height[right];
+            }
+        }
+
+        return water;        
+    }
+}
+51. N-Queens
+class Solution {
+    public List<List<String>> solveNQueens(int n) {
+        List<List<String>> results = new ArrayList<>();
+        if (n == 1) {
+            List<String> solution = new ArrayList<>();
+            solution.add("Q");
+            results.add(solution);
+            return results;
+        }
+        if (n == 2 || n == 3) {
+            return results;
+        }
+
+        int[] solution = new int[n];
+        for (int i = 0; i < n; i++) {
+            solution[i] = -1;
+        }
+
+        solveNQueensRec(n, solution, 0, results);
+        return results;
+    }
+
+    // Recursive worker function
+    private void solveNQueensRec(int n, int[] solution, int row, List<List<String>> results) {
+        if (row == n) {
+            List<String> solutionStr = constructSolutionString(solution);
+            results.add(solutionStr);
+            return;
+        }
+
+        for (int i = 0; i < n; i++) {
+            if (isValidMove(row, i, solution)) {
+                solution[row] = i;
+                solveNQueensRec(n, solution, row + 1, results);
+                solution[row] = -1; // Backtrack
+            }
+        }
+    }
+
+    // This method determines if a queen can be placed at
+    // proposedRow, proposedCol with the current solution
+    private boolean isValidMove(int proposedRow, int proposedCol, int[] solution) {
+        for (int i = 0; i < proposedRow; i++) {
+            int oldRow = i;
+            int oldCol = solution[i];
+            int diagonalOffset = proposedRow - oldRow;
+
+            if (oldCol == proposedCol || oldCol == proposedCol - diagonalOffset
+                    || oldCol == proposedCol + diagonalOffset) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // Constructs the board solution as a list of strings
+    private List<String> constructSolutionString(int[] solution) {
+        List<String> returnArr = new ArrayList<>();
+        for (int i = 0; i < solution.length; i++) {
+            char[] row = new char[solution.length];
+            for (int j = 0; j < solution.length; j++) {
+                row[j] = '.';
+            }
+            row[solution[i]] = 'Q';
+            returnArr.add(new String(row));
+        }
+        return returnArr;
+    }
+}
