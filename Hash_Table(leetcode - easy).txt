@@ -1,0 +1,99 @@
+1. Two Sum
+class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        Map<Integer, Integer> numMap = new HashMap<>();
+        int n = nums.length;
+
+        // Build the hash table
+        for (int i = 0; i < n; i++) {
+            numMap.put(nums[i], i);
+        }
+
+        // Find the complement
+        for (int i = 0; i < n; i++) {
+            int complement = target - nums[i];
+            if (numMap.containsKey(complement) && numMap.get(complement) != i) {
+                return new int[]{i, numMap.get(complement)};
+            }
+        }
+
+        return new int[]{}; // No solution found
+    }
+}
+13. Roman to Integer
+class Solution {
+    public int romanToInt(String s) {
+        int res = 0;
+        Map<Character, Integer> roman = new HashMap<>();
+        roman.put('I', 1);
+        roman.put('V', 5);
+        roman.put('X', 10);
+        roman.put('L', 50);
+        roman.put('C', 100);
+        roman.put('D', 500);
+        roman.put('M', 1000);
+
+        for (int i = 0; i < s.length() - 1; i++) {
+            if (roman.get(s.charAt(i)) < roman.get(s.charAt(i + 1))) {
+                res -= roman.get(s.charAt(i));
+            } else {
+                res += roman.get(s.charAt(i));
+            }
+        }
+
+        return res + roman.get(s.charAt(s.length() - 1));        
+    }
+}
+141. Linked List Cycle
+public class Solution {
+    public boolean hasCycle(ListNode head) {
+        ListNode fast = head;
+        ListNode slow = head;
+
+        while (fast != null && fast.next != null) {
+            fast = fast.next.next;
+            slow = slow.next;
+
+            if (fast == slow) {
+                return true;
+            }
+        }
+
+        return false;        
+    }
+}
+160. Intersection of Two Linked Lists
+public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
+    //boundary check
+    if(headA == null || headB == null) return null;
+    
+    ListNode a = headA;
+    ListNode b = headB;
+    
+    //if a & b have different len, then we will stop the loop after second iteration
+    while( a != b){
+    	//for the end of first iteration, we just reset the pointer to the head of another linkedlist
+        a = a == null? headB : a.next;
+        b = b == null? headA : b.next;    
+    }
+    
+    return a;
+}
+169. Majority Element
+class Solution {
+    public int majorityElement(int[] nums) {
+        HashMap<Integer, Integer> hash = new HashMap<>();
+        int res = 0;
+        int majority = 0;
+
+        for (int n : nums) {
+            hash.put(n, 1 + hash.getOrDefault(n, 0));
+            if (hash.get(n) > majority) {
+                res = n;
+                majority = hash.get(n);
+            }
+        }
+
+        return res;        
+    }
+}
