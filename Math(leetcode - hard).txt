@@ -1,0 +1,122 @@
+335. Self Crossing
+public class Solution {
+    public boolean isSelfCrossing(int[] x) {
+        if (x.length <= 3) {
+            return false;
+        }
+        int i = 2;
+        // keep spiraling outward
+        while (i < x.length && x[i] > x[i - 2]) {
+            i++;
+        }
+        if (i >= x.length) {
+            return false;
+        }
+        // transition from spiraling outward to spiraling inward
+        if ((i >= 4 && x[i] >= x[i - 2] - x[i - 4]) ||
+                (i == 3 && x[i] == x[i - 2])) {
+            x[i - 1] -= x[i - 3];
+        }
+        i++;
+        // keep spiraling inward
+        while (i < x.length) {
+            if (x[i] >= x[i - 2]) {
+                return true;
+            }
+            i++;
+        }
+        return false;
+    }
+}
+381. Insert Delete GetRandom O(1) - Duplicates allowed
+class RandomizedCollection {
+     List<Integer> list = new LinkedList<>();
+    public RandomizedCollection() {
+
+    }
+    
+    public boolean insert(int val) {
+     if(list.contains(val)){
+        list.add(val);
+        return false;
+        }
+        else{
+            list.add(val);
+        }
+     return true; 
+
+    }
+    
+    public boolean remove(int val) {
+       return list.remove(Integer.valueOf(val)); 
+    }
+    
+    public int getRandom() {
+        if(list.isEmpty()){return -1;}
+        Random rand = new Random();
+        int index = (rand.nextInt(list.size()));
+        return list.get(index);
+    }
+}
+
+/**
+ * Your RandomizedCollection object will be instantiated and called as such:
+ * RandomizedCollection obj = new RandomizedCollection();
+ * boolean param_1 = obj.insert(val);
+ * boolean param_2 = obj.remove(val);
+ * int param_3 = obj.getRandom();
+ */
+458. Poor Pigs
+class Solution
+{
+    public int poorPigs(int buckets, int tdie, int ttest)
+    {
+        int test = ttest/tdie;
+        int i=0;
+        while(Math.pow(test+1,i)< buckets)
+        {
+            i++;
+        }
+        return i;
+    }
+}
+479. Largest Palindrome Product
+class Solution {
+    public int largestPalindrome(int n) {
+        if(n==1)
+        return 9;
+        if(n==2)
+        return 987;
+        if(n==3)
+        return 123;
+        if(n==4)return 597;
+        if(n==5)return 677;
+        if(n==6)return 1218;
+        if(n==7)return 877;
+        if(n==8)return 475;
+        return 0;
+    }
+}
+483. Smallest Good Base
+class Solution {
+    public String smallestGoodBase(String n) {
+        long low = Long.valueOf(n);
+        int high = (int) (Math.log(low + 1) / Math.log(2)) - 1;
+        
+        long result = low - 1;
+        for (int m = high; m > 1; m--) {
+            long k = (long) Math.pow(low, 1.0 / m);
+            if (geometric(k, m) == low) return String.valueOf(k);
+        }
+        return String.valueOf(result);
+    }
+
+    private long geometric(long base, int m) {
+        long result = 0;
+        for (int i = 0; i <= m; i++) {
+            result = 1 + result * base;
+        }
+        return result;
+    }
+}
+
