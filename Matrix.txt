@@ -1,0 +1,245 @@
+1267. Count Servers that Communicate
+class Solution {
+    public int countServers(int[][] grid) {
+        boolean[] row=new boolean[grid.length];
+        boolean[] col=new boolean[grid[0].length];
+        for(int i=0; i<grid.length; i++){
+            int count=0;
+            boolean check=false;
+            for(int j=0; j<grid[0].length; j++){
+                if(grid[i][j]==1){
+                    count++;
+                    if(count>1){
+                        check=true;
+                        break;
+                    }
+                }
+            }
+            row[i]=check;
+        }
+        for(int j=0; j<grid[0].length; j++){
+            int count=0;
+            boolean check=false;
+            for(int i=0; i<grid.length; i++){
+                if(grid[i][j]==1){
+                    count++;
+                    if(count>1){
+                        check=true;
+                        break;
+                    }
+                }
+            }
+            col[j]=check;
+        }
+        int ans=0;
+        for(int i=0; i<grid.length; i++){
+            for(int j=0;j<grid[0].length; j++){
+                if(grid[i][j]==1 && (row[i] || col[j])){
+                    ans++;
+                }
+            }
+        }
+        return ans;
+    }
+}
+1275. Find Winner on a Tic Tac Toe Game
+class Solution {
+    public String tictactoe(int[][] moves) {
+        int[] row = new int[3];
+        int[] col = new int[3];
+        int dia = 0;
+        int antiDia = 0;
+
+        //A: +1, B: -1
+        for (int i = 0; i < moves.length; i++) {
+            int r = moves[i][0];
+            int c = moves[i][1];
+
+            if (i % 2 == 0) {
+                row[r]++;
+                col[c]++;
+                if (r == c) dia++;
+                if (r + c == 2) antiDia++;
+
+                if (row[r] == 3 || col[c] == 3 || dia == 3 || antiDia == 3) {
+                    return "A";
+                }
+            } else {
+                row[r]--;
+                col[c]--;
+                if (r == c) dia--;
+                if (r + c == 2) antiDia--;
+
+                if (row[r] == -3 || col[c] == -3 || dia == -3 || antiDia == -3) {
+                    return "B";
+                }
+            }
+        }
+
+        return moves.length == 9 ? "Draw" : "Pending";
+    }
+}
+1277. Count Square Submatrices with All Ones
+// O(m * n)
+class Solution {
+    private final List<Integer[]> directions = List.of(
+            new Integer[]{1, 0}, new Integer[]{0, 1}, new Integer[]{1, 1}
+    );
+
+    public int countSquares(int[][] matrix) {
+        int count = 0;
+        int[][] memo = new int[matrix.length][matrix[0].length];
+        for (int[] row: memo) Arrays.fill(row, -1);
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < matrix[0].length; j++) {
+                count += expand(i, j, matrix, memo);
+            }
+        }
+        return count;
+    }
+
+    private int expand(int i, int j, int[][] matrix, int[][] memo) {
+        if(notValid(i, j, matrix)) return 0;
+        if(matrix[i][j] == 0) {
+            memo[i][j] = 0;
+            return memo[i][j];
+        }
+        if(memo[i][j] != -1) return memo[i][j];
+        int min = Integer.MAX_VALUE;
+        for (Integer[] direction: directions) {
+            int x = i + direction[0], y = j + direction[1];
+            min = Math.min(min, expand(x, y, matrix, memo));
+        }
+        memo[i][j] = 1 + min;
+        return memo[i][j];
+    }
+
+    private boolean notValid(int i, int j, int[][] matrix) {
+        return i < 0 || i >= matrix.length || j < 0 || j >= matrix[0].length;
+    }
+}
+1284. Minimum Number of Flips to Convert Binary Matrix to Zero Matrix
+class Solution {
+    int count =0;
+    public int minFlips(int[][] mat) {
+       /**
+        Following steps are required to solve this problem 
+        1. count the number of 1 
+        2. Back tracking - perform recursion on points where we have 1 
+            1. flip it to zero based on rules
+            2. flip it to 1 based on rules 
+        3. Check at any momemt the values of the count ==0 
+            then return the steps 
+        */ 
+        int m = mat.length;
+        int n = mat[0].length;
+        for(int i=0; i< m ; i++){
+            for(int j =0; j< n; j++){
+                if(mat[i][j] == 1){
+                    count++;
+                }
+            }
+        }
+        int res = recursion(mat, 0);
+        if(res == Integer.MAX_VALUE){
+            return -1;
+        }
+        return res;
+    }
+
+    private int recursion(int [][]mat, int ci){
+        if(count ==0){
+            return 0;
+        }
+        int m = mat.length;
+        int n = mat[0].length;
+        if(ci >= m*n){
+            return Integer.MAX_VALUE;
+        }
+         int res = Integer.MAX_VALUE;
+        int flip = Integer.MAX_VALUE;
+        // without flipping 
+        int nonflip = recursion(mat,ci+1);
+        res = Math.min(res, nonflip);
+        // with flip
+        flipMatrix(mat, ci);
+        int curr = recursion(mat, ci+1);
+        // because of overflow
+        if(curr != Integer.MAX_VALUE){
+            flip = 1+ curr;
+        }
+        flipMatrix(mat, ci);
+        res = Math.min(flip, res);
+        return res;
+
+    }
+
+    private void flipMatrix(int[][]mat, int ci){
+        int m = mat.length;
+        int n = mat[0].length;
+        int r = ci/n;
+        int c = ci%n;
+
+        if(mat[r][c] == 0){
+            mat[r][c] = 1;
+            count++;
+        }else {
+            mat[r][c] = 0;
+            count--;
+        }
+
+        int [][]dirs = {{0,1}, {0,-1}, {1,0}, {-1,0}};
+        for(int []d : dirs){
+            int nr = r + d[0];
+            int nc = c + d[1];
+
+            if(nr <0 || nr>= m || nc< 0 || nc>=n){
+                continue;
+            }
+            if(mat[nr][nc] == 1){
+                mat[nr][nc] = 0;
+                count--;
+            }else {
+                mat[nr][nc] = 1;
+                count++;
+            }
+        }
+    }
+}
+1289. Minimum Falling Path Sum II
+class Solution {
+    public int minFallingPathSum(int[][] matrix) {
+        int n = matrix.length;
+
+        for (int i = 1; i < n; i++) {
+            int minVal = Integer.MAX_VALUE, secondMinVal = Integer.MAX_VALUE, minIndex = -1;
+
+            // Find the minimum and second minimum values in the previous row
+            for (int j = 0; j < n; j++) {
+                if (matrix[i - 1][j] < minVal) {
+                    secondMinVal = minVal;
+                    minVal = matrix[i - 1][j];
+                    minIndex = j;
+                } else if (matrix[i - 1][j] < secondMinVal) {
+                    secondMinVal = matrix[i - 1][j];
+                }
+            }
+
+            // Update the current row with the minimum sum for each cell
+            for (int j = 0; j < n; j++) {
+                if (j != minIndex) {
+                    matrix[i][j] += minVal;
+                } else {
+                    matrix[i][j] += secondMinVal;
+                }
+            }
+        }
+
+        int minSum = Integer.MAX_VALUE;
+        for (int val : matrix[n - 1]) {
+            minSum = Math.min(minSum, val);
+        }
+
+        return minSum;
+    }
+}
