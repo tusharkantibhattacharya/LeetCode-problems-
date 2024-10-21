@@ -1,0 +1,474 @@
+979. Distribute Coins in Binary Tree
+class Solution {
+    private int steps = 0;
+
+    private int dfs(TreeNode node) {
+        if (node == null) return 0;
+
+        int leftReq = dfs(node.left);
+        int rightReq = dfs(node.right);
+
+        steps += Math.abs(leftReq) + Math.abs(rightReq);
+
+        return (node.val - 1) + leftReq + rightReq;
+    }
+
+    public int distributeCoins(TreeNode root) {
+        dfs(root);
+        return steps;
+    }
+}
+988. Smallest String Starting From Leaf
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    String smallestString = null;
+    
+    public String smallestFromLeaf(TreeNode root) {
+        dfs(root, new StringBuilder());
+        return smallestString;
+    }
+    
+    private void dfs(TreeNode node, StringBuilder currentString) {
+        if (node == null) {
+            return;
+        }
+        
+        currentString.insert(0, (char) ('a' + node.val));
+        
+        if (node.left == null && node.right == null) {
+            updateSmallestString(currentString.toString());
+        } else {
+            dfs(node.left, currentString);
+            dfs(node.right, currentString);
+        }
+        
+        currentString.deleteCharAt(0);
+    }
+    
+    private void updateSmallestString(String currentString) {
+        if (smallestString == null || currentString.compareTo(smallestString) < 0) {
+            smallestString = currentString;
+        }
+    }
+}
+1020. Number of Enclaves
+class Solution {
+    public void dfs(int[][] grid,int i,int j){
+        if(i<0 || j<0 ||i>=grid.length || j>=grid[0].length || grid[i][j]==0){
+            return;
+        }
+        grid[i][j]=0;
+        dfs(grid,i+1,j);
+        dfs(grid,i-1,j);
+        dfs(grid,i,j+1);
+        dfs(grid,i,j-1);
+    }
+    public int numEnclaves(int[][] grid) {
+        int n = grid.length;
+        int m = grid[0].length;
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++){
+                if(grid[i][j]==1){
+                    if(i==0 || j==0 || i==n-1  || j==m-1 ){
+                        dfs(grid,i,j);
+                    }
+                }
+            }
+        }
+        int total=0;
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++){
+                if(grid[i][j]==1){
+                    total++;
+                }
+            }
+        }
+        return total;
+    }
+}
+1026. Maximum Difference Between Node and Ancestor
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    public int maxAncestorDiff(TreeNode root) {
+        return dfs(root, root.val, root.val);  // Initialize min and max with root's value
+    }
+
+    private int dfs(TreeNode root, int min, int max) {
+        if (root == null) {
+            return Math.abs(max - min);  // Calculate and return difference at leaf nodes
+        }
+
+        min = Math.min(min, root.val);
+        max = Math.max(max, root.val);
+
+        // Calculate and update maximum difference efficiently
+        int leftDiff = dfs(root.left, min, max);
+        int rightDiff = dfs(root.right, min, max);
+        return Math.max(Math.max(leftDiff, rightDiff), Math.abs(max - root.val));
+    }
+}
+1034. Coloring A Border
+class Solution {
+    public int[][] colorBorder(int[][] grid, int r0, int c0, int color) {
+        
+        int n = grid.length;
+        int m = grid[0].length;
+        
+        if (grid[r0][c0]==color)
+            return grid;
+        
+        boolean[][] visited = new boolean[n][m];
+        dfs(grid, r0, c0, grid[r0][c0], visited, color, n, m);
+        
+        return grid;
+        
+    }
+    
+    public void dfs(int[][] grid, int i, int j, int col, boolean[][] visited, int target, int n, int m){
+        
+        if (i>n-1 || i<0 || j>m-1 || j<0 || grid[i][j]!=col || visited[i][j])
+            return;
+        
+        visited[i][j] = true;
+        boolean border = false;
+        
+        if (i==0 || j==0 || j==m-1 || i==n-1 || grid[i+1][j]!=col || grid[i-1][j]!=col || grid[i][j-1]!=col || grid[i][j+1]!=col)
+            border = true;
+        
+        dfs(grid, i+1, j, col, visited, target, n, m);
+        dfs(grid, i-1, j, col, visited, target, n, m);
+        dfs(grid, i, j+1, col, visited, target, n, m);
+        dfs(grid, i, j-1, col, visited, target, n, m);
+        
+        if (border)
+            grid[i][j] = target;
+        
+    }
+}
+1038. Binary Search Tree to Greater Sum Tree
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    private int sum = 0;
+    
+    public TreeNode bstToGst(TreeNode root) {
+        reverseInorderTraversal(root);
+        return root;
+    }
+    
+    private void reverseInorderTraversal(TreeNode node) {
+        if (node == null) {
+            return;
+        }
+        reverseInorderTraversal(node.right);
+        sum += node.val;
+        node.val = sum;
+        reverseInorderTraversal(node.left);
+    }
+}
+1042. Flower Planting With No Adjacent
+class Solution {
+    public int[] gardenNoAdj(int n, int[][] paths) {
+        List<List<Integer>> adj = getAdjacencyList(paths, n);
+        int[] result = new int[n];
+        solve(1, adj, result, n);
+        return result;
+    }
+
+    private boolean solve(int node, List<List<Integer>> adj, int[] result, int n) {
+        if (node == n + 1) return true;
+
+        for (int col = 1; col <= 4; col++) {
+            if (isPossible(node, col, adj, result)) {
+                result[node - 1] = col;
+                if (solve(node + 1, adj, result, n)) return true;
+                result[node - 1] = 0;
+            }
+        }
+        return false;
+    }
+
+    private boolean isPossible(int node, int col, List<List<Integer>> adj, int[] result) {
+        for (int it : adj.get(node)) {
+            if (result[it - 1] == col) return false;
+        }
+        return true;
+    }
+
+    private List<List<Integer>> getAdjacencyList(int[][] paths, int n) {
+        List<List<Integer>> adj = new ArrayList<>();
+        for (int i = 0; i <= n; i++) adj.add(new ArrayList<>());
+        for (int[] path : paths) {
+            adj.get(path[0]).add(path[1]);
+            adj.get(path[1]).add(path[0]);
+        }
+        return adj;
+    }
+}
+1080. Insufficient Nodes in Root to Leaf Paths
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    public TreeNode sufficientSubset(TreeNode root, int limit) {
+        if(root == null)
+            return root;
+
+        if(root.left == null && root.right == null)
+            return root.val < limit ? null : root;
+
+        root.left = sufficientSubset(root.left, limit - root.val);
+        root.right = sufficientSubset(root.right, limit - root.val);
+
+        return root.left == root.right ? null : root;
+    }
+}
+1110. Delete Nodes And Return Forest
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    public List<TreeNode> delNodes(TreeNode root, int[] to_delete) {
+        ArrayList<TreeNode> list = new ArrayList<>();
+        for(int i=0;i<to_delete.length;i++){
+            if(root.val==to_delete[i]){
+                break;
+            }
+            if(i==to_delete.length-1){
+                list.add(root);
+            }
+        }
+        help(root,list,to_delete);
+        return list;
+    }
+    public TreeNode help(TreeNode root,ArrayList<TreeNode> list,int[] to_delete){
+        if(root==null){
+            return null;
+        }
+        TreeNode left = help(root.left,list,to_delete);
+        TreeNode right = help(root.right,list,to_delete);
+        if(left==null){
+            root.left=null;
+        }
+        if(right==null){
+            root.right=null;
+        }
+        for(int i=0;i<to_delete.length;i++){
+            if(root.val==to_delete[i]){
+                if(root.left!=null){
+                    list.add(root.left);
+                }
+                if(root.right!=null){
+                    list.add(root.right);
+                }
+                return null;
+            }
+        }
+        return root;
+    }
+}
+1123. Lowest Common Ancestor of Deepest Leaves
+class Solution {
+    public TreeNode lcaDeepestLeaves(TreeNode root) {
+        if(root==null) return root;
+        int l=height(root.left);
+        int r=height(root.right);
+        if(l==r) return root;
+        if(l>r) return lcaDeepestLeaves(root.left);
+        else return lcaDeepestLeaves(root.right);
+    }
+    public int height(TreeNode root){
+        if(root==null) return 0;
+        return Math.max(height(root.left),height(root.right))+1;
+    }
+}
+1145. Binary Tree Coloring Game
+class Solution {
+    public boolean btreeGameWinningMove(TreeNode root, int n, int x) {
+        TreeNode[] red = new TreeNode[1];
+        findNode(root, x, red);
+        int[] countLeft = new int[1], countRight = new int[1];
+        countNodes(red[0].left, countLeft);
+        countNodes(red[0].right, countRight);
+
+        int l = countLeft[0], r = countRight[0];
+
+        return l > n - l || r > n - r || l + r + 1 < n - l - r - 1;      
+    }
+
+    private void countNodes(TreeNode node, int[] count) {
+        if (node == null) return;
+        
+        count[0]++;
+        countNodes(node.left, count);
+        countNodes(node.right, count);
+    }
+
+    private void findNode(TreeNode node, int x, TreeNode[] res) {
+        if (node == null) return;
+        
+        if (node.val == x) {
+            res[0] = node;
+            return;
+        }
+        
+        findNode(node.left, x, res);
+        findNode(node.right, x, res);
+    }
+}
+1161. Maximum Level Sum of a Binary Tree
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    public int maxLevelSum(TreeNode root) {
+
+        int level=1;
+        ArrayDeque<TreeNode>q=new ArrayDeque<>();
+       
+         int ans=0;
+        q.add(root);
+ int maxsum=Integer.MIN_VALUE;
+        while(!q.isEmpty())
+        {
+            int size=q.size();
+             int sum=0;
+
+            for(int i=0;i<size;i++)
+            {
+                TreeNode n=q.poll();
+                if(n.left!=null)
+                q.add(n.left);
+                if(n.right!=null)
+                q.add(n.right);
+
+                sum+=n.val;
+
+            }
+
+            if(sum>maxsum)
+            {
+                maxsum=sum;
+                ans=level;
+            }
+            level++;
+        }
+
+        return ans;
+        
+    }
+}
+1202. Smallest String With Swaps
+class UF {
+  public UF(int n) {
+    id = new int[n];
+    for (int i = 0; i < n; ++i)
+      id[i] = i;
+  }
+
+  public void union(int u, int v) {
+    id[find(u)] = find(v);
+  }
+
+  public int find(int u) {
+    return id[u] == u ? u : (id[u] = find(id[u]));
+  }
+
+  private int[] id;
+}
+
+class Solution {
+  public String smallestStringWithSwaps(String s, List<List<Integer>> pairs) {
+    StringBuilder ans = new StringBuilder();
+    UF uf = new UF(s.length());
+    Map<Integer, Queue<Character>> map = new HashMap<>();
+
+    for (List<Integer> pair : pairs)
+      uf.union(pair.get(0), pair.get(1));
+
+    for (int i = 0; i < s.length(); ++i)
+      map.computeIfAbsent(uf.find(i), k -> new PriorityQueue<>()).offer(s.charAt(i));
+
+    for (int i = 0; i < s.length(); ++i)
+      ans.append(map.get(uf.find(i)).poll());
+
+    return ans.toString();
+  }
+}

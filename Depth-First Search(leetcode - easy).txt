@@ -1,0 +1,251 @@
+94. Binary Tree Inorder Traversal
+class Solution {
+    public List<Integer> inorderTraversal(TreeNode root) {
+        List<Integer> res = new ArrayList<>();
+
+        inorder(root, res);
+        return res;        
+    }
+
+    private void inorder(TreeNode node, List<Integer> res) {
+        if (node == null) {
+            return;
+        }
+        inorder(node.left, res);
+        res.add(node.val);
+        inorder(node.right, res);
+    }    
+}
+100. Same Tree
+class Solution {
+    public boolean isSameTree(TreeNode p, TreeNode q) {
+        // Base case: if both trees are null, they are identical
+        if (p == null && q == null) {
+            return true;
+        }
+        // If only one tree is null or the values are different, they are not identical
+        if (p == null || q == null || p.val != q.val) {
+            return false;
+        }
+        // Recursively check if the left and right subtrees are identical
+        return isSameTree(p.left, q.left) && isSameTree(p.right, q.right);
+    }
+}
+101. Symmetric Tree
+class Solution {
+    public boolean isSymmetric(TreeNode root) {
+        return isMirror(root.left, root.right);
+    }
+    
+    private boolean isMirror(TreeNode n1, TreeNode n2) {
+        if (n1 == null && n2 == null) {
+            return true;
+        }
+        
+        if (n1 == null || n2 == null) {
+            return false;
+        }
+        
+        return n1.val == n2.val && isMirror(n1.left, n2.right) && isMirror(n1.right, n2.left);
+    }
+}
+104. Maximum Depth of Binary Tree
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    public int maxDepth(TreeNode root) {
+        //base condition return 0 is null
+        if(root==null){
+            return 0;
+        }
+        //else return the 1+max(left, right)
+        //recursion function
+        //return 1+ Math.max(maxDepth(root.left),maxDepth(root.right));
+
+        //more optimized
+        int leftDepth = maxDepth(root.left);
+        int rightDepth = maxDepth(root.right);
+
+        return 1+Math.max(leftDepth,rightDepth);
+    }
+}
+110. Balanced Binary Tree
+class Solution {
+    public boolean isBalanced(TreeNode root) {
+        // If the tree is empty, we can say it’s balanced...
+        if (root == null)  return true;
+        // Height Function will return -1, when it’s an unbalanced tree...
+		if (Height(root) == -1)  return false;
+		return true;
+	}
+    // Create a function to return the “height” of a current subtree using recursion...
+	public int Height(TreeNode root) {
+        // Base case...
+		if (root == null)  return 0;
+        // Height of left subtree...
+		int leftHeight = Height(root.left);
+        // Height of height subtree...
+		int rightHight = Height(root.right);
+        // In case of left subtree or right subtree unbalanced, return -1...
+		if (leftHeight == -1 || rightHight == -1)  return -1;
+        // If their heights differ by more than ‘1’, return -1...
+        if (Math.abs(leftHeight - rightHight) > 1)  return -1;
+        // Otherwise, return the height of this subtree as max(leftHeight, rightHight) + 1...
+		return Math.max(leftHeight, rightHight) + 1;
+    }
+}
+111. Minimum Depth of Binary Tree
+class Solution {
+    public int minDepth(TreeNode root) {
+        // Base case...
+        // If the subtree is empty i.e. root is NULL, return depth as 0...
+        if(root == null)  return 0;
+        // Initialize the depth of two subtrees...
+        int leftDepth = minDepth(root.left);
+        int rightDepth = minDepth(root.right);
+        // If the both subtrees are empty...
+        if(root.left == null && root.right == null)
+            return 1;
+        // If the left subtree is empty, return the depth of right subtree after adding 1 to it...
+        if(root.left == null)
+            return 1 + rightDepth;
+        // If the right subtree is empty, return the depth of left subtree after adding 1 to it...
+        if(root.right == null)
+            return 1 + leftDepth;
+        // When the two child function return its depth...
+        // Pick the minimum out of these two subtrees and return this value after adding 1 to it...
+        return Math.min(leftDepth, rightDepth) + 1;    // Adding 1 is the current node which is the parent of the two subtrees...
+    }
+}
+112. Path Sum
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    public boolean hasPathSum(TreeNode root, int targetSum) {
+       if(root==null) return false;
+       if(root.left==null&&root.right==null) {
+           return targetSum==root.val;
+       }
+
+       boolean rightsum=hasPathSum(root.right, targetSum-root.val);
+       boolean leftsum=hasPathSum(root.left, targetSum-root.val);
+
+       return rightsum || leftsum;
+    }
+}
+144. Binary Tree Preorder Traversal
+class Solution {
+    public List<Integer> preorderTraversal(TreeNode root) {
+        List<Integer> res = new ArrayList<>();
+
+        preorder(root, res);
+        return res;        
+    }
+
+    private void preorder(TreeNode node, List<Integer> res) {
+        if (node == null) {
+            return;
+        }
+
+        res.add(node.val);
+        preorder(node.left, res);
+        preorder(node.right, res);
+    }    
+}
+145. Binary Tree Postorder Traversal
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    public List<Integer> postorderTraversal(TreeNode root) {
+        List<Integer> result = new ArrayList<>();
+        fun(root,result);
+        return result;
+
+    }
+
+    private void fun(TreeNode root, List<Integer> result){
+        if(root != null){
+            fun(root.left,result);
+            fun(root.right,result);
+            result.add(root.val);
+        }
+    }
+
+}
+226. Invert Binary Tree
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ * int val;
+ * TreeNode left;
+ * TreeNode right;
+ * TreeNode() {}
+ * TreeNode(int val) { this.val = val; }
+ * TreeNode(int val, TreeNode left, TreeNode right) {
+ * this.val = val;
+ * this.left = left;
+ * this.right = right;
+ * }
+ * }
+ */
+class Solution {
+    public TreeNode invertTree(TreeNode root) {
+        // Base case: end recursive call if current node is null
+        if (root == null) {
+            return null;
+        }
+        // We will do a post-order traversal of the binary tree.
+        if (root.left != null) {
+            invertTree(root.left);
+        }
+        if (root.right != null) {
+            invertTree(root.right);
+        }
+
+        // Let's swap the left and right nodes at current level.
+        TreeNode temp = root.left;
+        root.left = root.right;
+        root.right = temp;
+
+        return root;
+    }
+}

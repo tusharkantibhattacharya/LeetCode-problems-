@@ -1,0 +1,230 @@
+2646. Minimize the Total Price of the Trips
+class Solution {
+
+    public int minimumTotalPrice(int n, int[][] edges, int[] price, int[][] trips) {
+
+        // Create Adjacency List
+        Map<Integer, List<Integer>> adjList = new HashMap<>();
+        for (int i = 0; i < n; i++) adjList.put(i, new ArrayList<>());
+        for (int[] edge : edges) {
+            adjList.get(edge[0]).add(edge[1]);
+            adjList.get(edge[1]).add(edge[0]);
+        }
+
+        // For all the trips, find the shortest path and update the contribution map.
+        Map<Integer, Integer> contributionMap = new HashMap<>();
+        for (int[] t : trips) {
+            bfs(n, adjList, contributionMap, t[0], t[1]);
+        }
+
+        // Calculate the minimum price using dfs with DP.
+        int[][] dp = new int[n][2];
+        for (int[] row : dp) Arrays.fill(row, -1);
+        int ans = dfs(contributionMap, adjList, price, 0, dp, 0, -1);
+        return ans;
+
+    }
+
+    private int dfs(Map<Integer, Integer> contributionMap, Map<Integer, List<Integer>> adjList, int[] price, int curr, int[][] dp, int isParentHalved, int parent) {
+        if (dp[curr][isParentHalved] != -1) return dp[curr][isParentHalved];
+
+        // For the current node, store the price with the price[current] halved.
+        int halved = contributionMap.getOrDefault(curr, 0) * (price[curr] / 2);
+
+        // For the current node, store the price with the price[current] not halved.
+        int notHalved = contributionMap.getOrDefault(curr, 0) * price[curr];
+
+        // if parent is halved, then current will be not halved
+        // if parent is not halved, we can either half or not half it
+        for (int neighbour : adjList.get(curr)) {
+            if (neighbour != parent) {
+                notHalved += dfs(contributionMap, adjList, price, neighbour, dp, 0, curr);
+            }
+        }
+        if (isParentHalved == 1) {
+            return dp[curr][isParentHalved] = notHalved;  // return the notHalved value since parent is halved and current can't be halved
+        }
+
+        for (int neighbour : adjList.get(curr)) {
+            if (neighbour != parent) {
+                halved += dfs(contributionMap, adjList, price, neighbour, dp, 1, curr);
+            }
+        }
+        return dp[curr][isParentHalved] = Math.min(halved, notHalved);  // return the min of halved and non-halved when parent is not halved.
+    }
+
+    private void bfs(int n, Map<Integer, List<Integer>> adjList, Map<Integer, Integer> contibutionMap, int start, int end) {
+        Queue<Integer> q = new LinkedList<>();
+        boolean[] visited = new boolean[n];
+        int[] parent = new int[n];
+        Arrays.fill(parent, -1);
+        q.offer(start);
+        visited[start] = true;
+        while (!q.isEmpty()) {
+            int temp = q.poll();
+            if (temp == end) break;
+
+            for (int neighbour : adjList.get(temp)) {
+                if (!visited[neighbour]) {
+                    q.offer(neighbour);
+                    visited[neighbour] = true;
+                    parent[neighbour] = temp;
+                }
+            }
+        }
+        start = end;
+        while (start != -1) {
+            contibutionMap.put(start, contibutionMap.getOrDefault(start, 0) + 1);
+            start = parent[start];
+        }
+    }
+}
+2791. Count Paths That Can Form a Palindrome in a Tree
+class Solution {
+    long long dfs(int x, int mask, const string &s, const vector<vector<int>>& con, unordered_map<int, int>& have) {
+        long long r = 0;
+        if (x) {
+            mask ^= 1 << (s[x] - 'a');
+            for (int i = 1 << 25; i; i >>= 1) {
+                if (have.count(mask ^ i)) {
+                    r += have[mask ^ i];
+                }
+            }
+            r += have[mask]++;
+        }
+        for (int y : con[x]) {
+            r += dfs(y, mask, s, con, have);
+        }
+        return r;
+    }}
+2858. Minimum Edge Reversals So Every Node Is Reachable
+    Map<Integer, Map<Integer, Integer>> G = new HashMap<>();
+    int[] res;
+
+    public int[] minEdgeReversals(int n, int[][] edges) {
+        G.clear();
+        for (int[] e : edges) {
+            G.computeIfAbsent(e[0], x -> new HashMap<>()).put(e[1], 0);
+            G.computeIfAbsent(e[1], x -> new HashMap<>()).put(e[0], 1);
+        }
+
+        res = new int[n];
+        Arrays.fill(res, -1);
+
+        dfs(0, dp(-1, 0));
+        return res;
+    }
+
+    private int dp(int i, int j) {
+        int sum = 0;
+        for (Integer k : G.get(j).keySet()) {
+            if (k == i) continue;
+            sum += dp(j, k) + G.get(j).get(k);
+        }
+        return sum;
+    }
+
+    private void dfs(int i, int v) {
+        res[i] = v;
+        for (Integer j : G.get(i).keySet())
+            if (res[j] < 0)
+                dfs(j, v - G.get(i).get(j) + G.get(j).get(i));
+    }
+2867. Count Valid Paths in a Tree
+import java.util.*;
+
+class Solution {
+    // Helper function to generate prime numbers up to 'n'.
+    private boolean[] genPrimes(int n) {
+        boolean[] prime = new boolean[n + 1];
+        if (n > 1) {
+            Arrays.fill(prime, 2, prime.length, true); // Initializing all numbers >= 2 as prime.
+        }
+        for (int i = 2; i <= n; ++i) {
+            if (prime[i]) {
+                for (int j = i + i; j <= n; j += i) {
+                    prime[j] = false; // Marking multiples of prime numbers as not prime.
+                }
+            }
+        }
+        return prime;
+    }
+
+    // Main function to count paths based on prime numbers.
+    public long countPaths(int n, int[][] edges) {
+        boolean[] isPrime = genPrimes(n); // Generate a list of prime numbers up to 'n'.
+        List<List<Integer>> E = new ArrayList<>(n); // Creating an adjacency list for the graph.
+
+        // Initialize the adjacency list.
+        for (int i = 0; i < n; ++i) {
+            E.add(new ArrayList<>());
+        }
+
+        // Populate the adjacency list based on given edges.
+        for (int i = 0; i < n - 1; ++i) {
+            int u = edges[i][0], v = edges[i][1];
+            --u;
+            --v;
+            E.get(u).add(v);
+            E.get(v).add(u);
+        }
+
+        long ans = 0; // Initialize the answer to zero.
+
+        // Depth-first search (DFS) function to traverse the tree and count paths.
+        Function<int[], int[]> dfs = (int[] arr) -> {
+            int x = arr[0];
+            int p = arr[1];
+            int prime = isPrime[x + 1]; // Check if the node number (1-based) is prime.
+            int[] cur = new int[2]; // Initialize an array to store counts based on prime status.
+            cur[prime]++; // Update the count for prime or non-prime node.
+
+            for (int y : E.get(x)) {
+                if (y == p) continue; // Skip the parent node.
+                int[] v = dfs.apply(new int[]{y, x}); // Recursively traverse the tree.
+
+                // Update the answer by counting paths based on prime and non-prime nodes.
+                ans += (long) v[0] * cur[1];
+                ans += (long) v[1] * cur[0];
+
+                cur[prime] += v[0]; // Update counts for the current node.
+
+                if (prime == 0) cur[1 + prime] += v[1]; // If non-prime, update the count for non-prime nodes.
+            }
+            return cur; // Return the count array for the current node.
+        };
+
+        dfs.apply(new int[]{0, -1}); // Start DFS from the root node (node 0) with parent -1.
+
+        return ans; // Return the final count of paths.
+    }
+}
+2872. Maximum Number of K-Divisible Components
+class Solution {
+    HashMap<Integer, List<Integer>> adj = new HashMap<>();
+    int k, values[];
+    private void makeAdj(int[][] edges, int n) {
+        for(int i=0;i<n;i++) adj.put(i, new ArrayList<Integer>());
+        for(int[] e: edges) {
+            adj.get(e[0]).add(e[1]);
+            adj.get(e[1]).add(e[0]);
+        }
+    }
+    public int maxKDivisibleComponents(int n, int[][] edges, int[] values, int k) {
+        this.values=values; this.k=k;
+        makeAdj(edges, n);
+        return f(0, -1)[1];
+    }
+    private int[] f(int curr, int paren) {
+        int sum=values[curr], n_comp=0;
+        for(int neigh: adj.get(curr)) {
+            if(neigh==paren) continue;
+            int[] v=f(neigh, curr); // 0: validcomp, 1: no of valid comp, 2: sum of non valid
+            n_comp+=v[1];
+            if(v[0]==0) sum+=v[2];
+        }
+        if(sum%k==0) return new int[]{1, n_comp+1, 0};
+        return new int[]{0, n_comp, sum};
+    }
+}
+
